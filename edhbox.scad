@@ -1,4 +1,6 @@
 include <BOSL2/std.scad>
+
+overlap_break = 0.001;
 card_thickness = 0.675;
 card_height = 94;
 card_width = 69;
@@ -50,6 +52,7 @@ full_height = floor_thickness + card_height + lid_height;
 
 art_plate_length = full_length - art_frame_thickness * 2 - art_plate_tolerance;
 art_plate_height = full_height - lid_height - art_top_buffer - art_frame_thickness - art_plate_tolerance;
+
 module lid_profile(w = lid_width, o = 0) {
   polygon(
     [
@@ -65,25 +68,25 @@ module lid_profile(w = lid_width, o = 0) {
 
 difference() {
   // main body
-  cuboid([full_width, full_length, full_height], anchor=BOTTOM + LEFT + FRONT, rounding=outer_corner_fillet_radius);
+  color("burlywood")
+    cuboid([full_width, full_length, full_height], anchor=BOTTOM + LEFT + FRONT, rounding=outer_corner_fillet_radius, edges="Z", $fn=32);
   // lid cutout
-  color("blue")
-    translate([half_wall, lid_length - 1, floor_thickness + card_height])
-      rotate([90, 0, 0])
-        linear_extrude(height=lid_length + 1)
-          lid_profile(o=1);
+  translate([half_wall, lid_length - overlap_break, floor_thickness + card_height])
+    rotate([90, 0, 0])
+      linear_extrude(height=lid_length + overlap_break)
+        lid_profile(o=1);
   // commander slot
   translate([side_wall_thickness, commander_wall_thickness, floor_thickness])
-    cube([card_width, commander_slot_thickness, card_height]);
+    cube([card_width, commander_slot_thickness, card_height + overlap_break]);
   // token cavity
   translate([side_wall_thickness, commander_front_thickness, floor_thickness])
-    cube([card_width, token_cavity_length, card_height]);
+    cube([card_width, token_cavity_length, card_height + overlap_break]);
   // deck cavity
   translate([side_wall_thickness, full_length - back_wall_thickness - deck_cavity_length, floor_thickness])
-    cube([card_width, deck_cavity_length, card_height]);
+    cube([card_width, deck_cavity_length, card_height + overlap_break]);
   // commander window
-  translate([side_wall_thickness + commander_frame_inset, 0, floor_thickness + commander_frame_inset])
-    cube([window_width, commander_wall_thickness, window_height]);
+  translate([side_wall_thickness + commander_frame_inset, 0 - overlap_break, floor_thickness + commander_frame_inset])
+    cube([window_width, commander_wall_thickness + 2 * overlap_break, window_height]);
 }
 ;
 
