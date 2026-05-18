@@ -111,3 +111,6 @@ diff()
 up(z=lid_height / 2)
   right(full_width + 10)
     lid();
+// art plate tester
+right(180)
+  cube([art_plate_length, art_indent_height, art_frame_thickness]);
