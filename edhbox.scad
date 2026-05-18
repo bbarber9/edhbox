@@ -29,6 +29,7 @@ floor_thickness = 2;
 
 deck_cards = 99;
 token_cards = 20;
+include_tokens = true;
 
 outer_corner_fillet_radius = 1;
 
@@ -38,9 +39,10 @@ lid_tolerance = 0.2;
 back_wall_thickness = magnet_thickness + magnet_buffer;
 deck_cavity_length = card_thickness * deck_cards;
 token_cavity_length = card_thickness * token_cards;
+token_section_length = include_tokens ? token_cavity_length + divider_thickness : 0;
 commander_front_thickness = commander_wall_thickness * 2 + commander_slot_thickness;
 lid_height = magnet_diameter + (magnet_buffer * 2);
-lid_length = commander_front_thickness + token_cavity_length + divider_thickness + deck_cavity_length;
+lid_length = commander_front_thickness + token_section_length + deck_cavity_length;
 lid_width = card_width + side_wall_thickness - lid_tolerance;
 lid_gap_width = card_width + side_wall_thickness;
 cavity_depth = card_height + lid_height;
@@ -94,9 +96,10 @@ diff()
       attach(BACK + BOTTOM, BACK + BOTTOM, inside=true)
         cube([card_width, deck_cavity_length, card_height + eps]);
     // token cavity
-    translate([0, commander_front_thickness, floor_thickness])
-      attach(FRONT + BOTTOM, FRONT + BOTTOM, inside=true)
-        cube([card_width, token_cavity_length, card_height + eps]);
+    if (include_tokens)
+      translate([0, commander_front_thickness, floor_thickness])
+        attach(FRONT + BOTTOM, FRONT + BOTTOM, inside=true)
+          cube([card_width, token_cavity_length, card_height + eps]);
     // right art panel gap
     translate([eps, 0, art_frame_thickness])
       attach(RIGHT + BOTTOM, LEFT + BOTTOM, inside=true)
