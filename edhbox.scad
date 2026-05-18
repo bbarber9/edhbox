@@ -1,6 +1,7 @@
 include <BOSL2/std.scad>
 
-overlap_break = 0.001;
+// Short for epsilon. It's for reducing z-fighting in the preview renderer
+eps = 0.001;
 card_thickness = 0.675;
 card_height = 94;
 card_width = 69;
@@ -20,6 +21,7 @@ commander_frame_inset = 4;
 
 art_frame_thickness = 2;
 art_indent_depth = 2;
+
 art_top_buffer = 1;
 art_plate_tolerance = 0.2;
 
@@ -40,6 +42,7 @@ commander_front_thickness = commander_wall_thickness * 2 + commander_slot_thickn
 lid_height = magnet_diameter + (magnet_buffer * 2);
 lid_length = commander_front_thickness + token_cavity_length + divider_thickness + deck_cavity_length;
 lid_width = card_width + side_wall_thickness - lid_tolerance;
+lid_gap_width = card_width + side_wall_thickness;
 cavity_depth = card_height + lid_height;
 half_wall = side_wall_thickness / 2;
 
@@ -50,48 +53,61 @@ full_length = lid_length + back_wall_thickness;
 full_width = side_wall_thickness * 2 + card_width;
 full_height = floor_thickness + card_height + lid_height;
 
-art_plate_length = full_length - art_frame_thickness * 2 - art_plate_tolerance;
-art_plate_height = full_height - lid_height - art_top_buffer - art_frame_thickness - art_plate_tolerance;
+art_indent_length = full_length - art_frame_thickness * 2;
+art_indent_height = full_height - lid_height - art_top_buffer - art_frame_thickness;
+art_plate_length = art_indent_length - art_plate_tolerance;
+art_plate_height = art_indent_height - art_plate_tolerance;
 
-module lid_profile(w = lid_width, o = 0) {
-  polygon(
-    [
-      [0, 0],
-      [w, 0],
-      [w - half_wall, lid_height / 2],
-      [w - half_wall, lid_height + o],
-      [half_wall, lid_height + o],
-      [half_wall, lid_height / 2],
-    ]
-  );
+// Create either the lid or the lid gap by 
+module lid(isLidGap = false) {
+  len = isLidGap ? lid_length + eps : lid_length;
+  top_height = isLidGap ? (lid_height / 2) + eps : lid_height / 2;
+  width = isLidGap ? lid_gap_width : lid_width;
+
+  cube([width - side_wall_thickness, len, top_height])
+    attach(BOTTOM, TOP, overlap=eps)
+      prismoid(
+        [width, len],
+        [width - side_wall_thickness, len],
+        (lid_height / 2) + eps
+      );
 }
 
-difference() {
+diff()
   // main body
-  color("burlywood")
-    cuboid([full_width, full_length, full_height], anchor=BOTTOM + LEFT + FRONT, rounding=outer_corner_fillet_radius, edges="Z", $fn=32);
-  // lid cutout
-  translate([half_wall, lid_length - overlap_break, floor_thickness + card_height])
-    rotate([90, 0, 0])
-      linear_extrude(height=lid_length + overlap_break)
-        lid_profile(o=1);
-  // commander slot
-  translate([side_wall_thickness, commander_wall_thickness, floor_thickness])
-    cube([card_width, commander_slot_thickness, card_height + overlap_break]);
-  // token cavity
-  translate([side_wall_thickness, commander_front_thickness, floor_thickness])
-    cube([card_width, token_cavity_length, card_height + overlap_break]);
-  // deck cavity
-  translate([side_wall_thickness, full_length - back_wall_thickness - deck_cavity_length, floor_thickness])
-    cube([card_width, deck_cavity_length, card_height + overlap_break]);
-  // commander window
-  translate([side_wall_thickness + commander_frame_inset, 0 - overlap_break, floor_thickness + commander_frame_inset])
-    cube([window_width, commander_wall_thickness + 2 * overlap_break, window_height]);
-}
-;
+  cuboid([full_width, full_length, full_height], anchor=BOTTOM + LEFT + FRONT, rounding=outer_corner_fillet_radius, edges="Z", $fn=32) {
+    // lid cutout
+    translate([0, -eps, eps])
+      attach(TOP + FRONT, TOP + FRONT, inside=true)
+        lid(isLidGap=true);
+    // commander slot
+    color("lightslategrey")
+      translate([0, commander_wall_thickness, eps - lid_height])
+        attach(TOP + FRONT, TOP + FRONT, inside=true)
+          cube([card_width, commander_slot_thickness, card_height + eps]);
+    // commander window
+    translate([0, -eps, floor_thickness + commander_frame_inset])
+      attach(FRONT + BOTTOM, FRONT + BOTTOM, inside=true)
+        cube([window_width, commander_wall_thickness + eps * 2, window_height]);
+    // deck cavity
+    translate([0, -back_wall_thickness, floor_thickness])
+      attach(BACK + BOTTOM, BACK + BOTTOM, inside=true)
+        cube([card_width, deck_cavity_length, card_height + eps]);
+    // token cavity
+    translate([0, commander_front_thickness, floor_thickness])
+      attach(FRONT + BOTTOM, FRONT + BOTTOM, inside=true)
+        cube([card_width, token_cavity_length, card_height + eps]);
+    // right art panel gap
+    translate([eps, 0, art_frame_thickness])
+      attach(RIGHT + BOTTOM, LEFT + BOTTOM, inside=true)
+        cube([art_indent_depth + eps, art_indent_length, art_indent_height]);
+    // left art panel gap
+    translate([-eps, 0, art_frame_thickness])
+      attach(LEFT + BOTTOM, RIGHT + BOTTOM, inside=true)
+        cube([art_indent_depth + eps, art_indent_length, art_indent_height]);
+  }
 
 // lid
-translate([full_width + 10, lid_length, 0])
-  rotate([90, 0, 0])
-    linear_extrude(height=lid_length)
-      lid_profile(lid_width - lid_tolerance);
+up(z=lid_height / 2)
+  right(full_width + 10)
+    lid();
