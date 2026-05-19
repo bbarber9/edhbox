@@ -36,7 +36,7 @@ outer_corner_fillet_radius = 1;
 lid_tolerance = 0.2;
 
 // derived
-back_wall_thickness = magnet_thickness + magnet_buffer;
+back_wall_thickness = magnet_thickness + magnet_back_buffer;
 deck_cavity_length = card_thickness * deck_cards;
 token_cavity_length = card_thickness * token_cards;
 token_section_length = include_tokens ? token_cavity_length + divider_thickness : 0;
