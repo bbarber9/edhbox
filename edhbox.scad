@@ -22,8 +22,9 @@ magnet_buffer = 0.8;
 magnet_back_buffer = 1;
 magnet_tolerance = 0.1;
 magnet_spacing = 20;
-// calculates the space between the edge of the magnet and the vertex of the hexagon
-magnet_space_to_vertex = (magnet_diameter / 2) * (1 - cos(30));
+magnet_slot_d = magnet_diameter + magnet_tolerance;
+// calculates the space between the edge of the magnet slot and the vertex of the hexagon
+magnet_space_to_vertex = (magnet_slot_d / 2) * ((1 / cos(30)) - 1);
 magnet_vertical_inset = magnet_buffer + magnet_space_to_vertex;
 
 divider_thickness = 1.5;
@@ -50,7 +51,7 @@ deck_cavity_length = card_thickness * deck_cards;
 token_cavity_length = card_thickness * token_cards;
 token_section_length = include_tokens ? token_cavity_length + divider_thickness : 0;
 commander_front_thickness = commander_wall_thickness * 2 + commander_slot_thickness;
-lid_height = magnet_diameter + (magnet_buffer * 2) + (magnet_space_to_vertex * 2);
+lid_height = magnet_slot_d + (magnet_buffer * 2) + (magnet_space_to_vertex * 2);
 lid_length = commander_front_thickness + token_section_length + deck_cavity_length;
 lid_width = card_width_with_buf + side_wall_thickness - lid_tolerance;
 lid_gap_width = card_width_with_buf + side_wall_thickness;
@@ -68,6 +69,11 @@ art_indent_length = full_length - art_frame_thickness * 2;
 art_indent_height = full_height - lid_height - art_top_buffer - art_frame_thickness;
 art_plate_length = art_indent_length - art_plate_tolerance;
 art_plate_height = art_indent_height - art_plate_tolerance;
+
+module magnet_slots() {
+  xcopies(magnet_spacing, n=3)
+    ycyl(l=magnet_thickness + eps, d=magnet_slot_d, circum=true, $fn=6);
+}
 
 // Create either the lid or the lid gap by 
 module lid(isLidGap = false) {
@@ -93,13 +99,8 @@ module lid(isLidGap = false) {
     diff()
       lid_body()
         back(eps)
-          attach(BACK, BACK, inside=true, align=TOP, inset=magnet_vertical_inset) {
-            ycyl(l=magnet_thickness + eps, d=magnet_diameter, circum=true, $fn=6);
-            left(magnet_spacing)
-              ycyl(l=magnet_thickness + eps, d=magnet_diameter, circum=true, $fn=6);
-            right(magnet_spacing)
-              ycyl(l=magnet_thickness + eps, d=magnet_diameter, circum=true, $fn=6);
-          }
+          attach(BACK, BACK, inside=true, align=TOP, inset=magnet_vertical_inset)
+            magnet_slots();
 }
 
 diff()
@@ -137,14 +138,8 @@ diff()
         cube([art_indent_depth + eps, art_indent_length, art_indent_height]);
     // hexagonal magnet slots
     fwd(magnet_back_buffer + eps)
-      attach(BACK, BACK, inside=true, align=TOP, inset=magnet_vertical_inset) {
-        ycyl(l=magnet_thickness + eps, d=magnet_diameter, circum=true, $fn=6);
-        left(magnet_spacing)
-          ycyl(l=magnet_thickness + eps, d=magnet_diameter, circum=true, $fn=6);
-        right(magnet_spacing)
-          ycyl(l=magnet_thickness + eps, d=magnet_diameter, circum=true, $fn=6);
-      }
-    ;
+      attach(BACK, BACK, inside=true, align=TOP, inset=magnet_vertical_inset)
+        magnet_slots();
   }
 
 // lid
