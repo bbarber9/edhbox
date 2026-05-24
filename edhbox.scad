@@ -1,11 +1,21 @@
 include <BOSL2/std.scad>
 
+deck_cards = 99;
+token_cards = 20;
+include_tokens = true;
+
+card_thickness = 0.675;
+card_height = 88;
+card_width = 63;
+
+/* [Hidden] */
+
 // Short for epsilon. It's for reducing z-fighting in the preview renderer
 eps = 0.001;
-card_thickness = 0.675;
-card_height = 94;
-card_width = 69;
 
+card_size_buf = 6;
+card_height_with_buf = card_height + card_size_buf;
+card_width_with_buf = card_width + card_size_buf;
 magnet_diameter = 5;
 magnet_thickness = 2.65;
 magnet_buffer = 0.8;
@@ -30,13 +40,9 @@ art_plate_tolerance = 0.4;
 
 floor_thickness = 2;
 
-deck_cards = 99;
-token_cards = 20;
-include_tokens = true;
+lid_tolerance = 0.2;
 
 outer_corner_fillet_radius = 1;
-
-lid_tolerance = 0.2;
 
 // derived
 back_wall_thickness = magnet_thickness + magnet_back_buffer;
@@ -46,17 +52,17 @@ token_section_length = include_tokens ? token_cavity_length + divider_thickness 
 commander_front_thickness = commander_wall_thickness * 2 + commander_slot_thickness;
 lid_height = magnet_diameter + (magnet_buffer * 2) + (magnet_space_to_vertex * 2);
 lid_length = commander_front_thickness + token_section_length + deck_cavity_length;
-lid_width = card_width + side_wall_thickness - lid_tolerance;
-lid_gap_width = card_width + side_wall_thickness;
-cavity_depth = card_height + lid_height;
+lid_width = card_width_with_buf + side_wall_thickness - lid_tolerance;
+lid_gap_width = card_width_with_buf + side_wall_thickness;
+cavity_depth = card_height_with_buf + lid_height;
 half_wall = side_wall_thickness / 2;
 
-window_width = card_width - commander_frame_inset * 2;
-window_height = card_height - commander_frame_inset * 2;
+window_width = card_width_with_buf - commander_frame_inset * 2;
+window_height = card_height_with_buf - commander_frame_inset * 2;
 
 full_length = lid_length + back_wall_thickness;
-full_width = side_wall_thickness * 2 + card_width;
-full_height = floor_thickness + card_height + lid_height;
+full_width = side_wall_thickness * 2 + card_width_with_buf;
+full_height = floor_thickness + card_height_with_buf + lid_height;
 
 art_indent_length = full_length - art_frame_thickness * 2;
 art_indent_height = full_height - lid_height - art_top_buffer - art_frame_thickness;
@@ -107,7 +113,7 @@ diff()
     color("lightslategrey")
       translate([0, commander_wall_thickness, eps - lid_height])
         attach(TOP + FRONT, TOP + FRONT, inside=true)
-          cube([card_width, commander_slot_thickness, card_height + eps]);
+          cube([card_width_with_buf, commander_slot_thickness, card_height_with_buf + eps]);
     // commander window
     translate([0, -eps, floor_thickness + commander_frame_inset])
       attach(FRONT + BOTTOM, FRONT + BOTTOM, inside=true)
@@ -115,12 +121,12 @@ diff()
     // deck cavity
     translate([0, -back_wall_thickness, floor_thickness])
       attach(BACK + BOTTOM, BACK + BOTTOM, inside=true)
-        cube([card_width, deck_cavity_length, card_height + eps]);
+        cube([card_width_with_buf, deck_cavity_length, card_height_with_buf + eps]);
     // token cavity
     if (include_tokens)
       translate([0, commander_front_thickness, floor_thickness])
         attach(FRONT + BOTTOM, FRONT + BOTTOM, inside=true)
-          cube([card_width, token_cavity_length, card_height + eps]);
+          cube([card_width_with_buf, token_cavity_length, card_height_with_buf + eps]);
     // right art panel gap
     translate([eps, 0, art_frame_thickness])
       attach(RIGHT + BOTTOM, LEFT + BOTTOM, inside=true)
