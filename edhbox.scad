@@ -69,13 +69,31 @@ module lid(isLidGap = false) {
   top_height = isLidGap ? (lid_height / 2) + eps : lid_height / 2;
   width = isLidGap ? lid_gap_width : lid_width;
 
-  cube([width - side_wall_thickness, len, top_height])
-    attach(BOTTOM, TOP, overlap=eps)
-      prismoid(
-        [width, len],
-        [width - side_wall_thickness, len],
-        (lid_height / 2) + eps
-      );
+  module lid_body() {
+    cube([width - side_wall_thickness, len, top_height]) {
+      attach(BOTTOM, TOP, overlap=eps)
+        prismoid(
+          [width, len],
+          [width - side_wall_thickness, len],
+          (lid_height / 2) + eps
+        );
+      children();
+    }
+  }
+
+  if (isLidGap)
+    lid_body();
+  else
+    diff()
+      lid_body()
+        back(eps)
+          attach(BACK, BACK, inside=true, align=TOP, inset=magnet_vertical_inset) {
+            ycyl(l=magnet_thickness + eps, d=magnet_diameter, circum=true, $fn=6);
+            left(magnet_spacing)
+              ycyl(l=magnet_thickness + eps, d=magnet_diameter, circum=true, $fn=6);
+            right(magnet_spacing)
+              ycyl(l=magnet_thickness + eps, d=magnet_diameter, circum=true, $fn=6);
+          }
 }
 
 diff()
@@ -124,9 +142,10 @@ diff()
   }
 
 // lid
-// up(z=lid_height / 2)
-//   right(full_width + 10)
-//     lid();
-// // art plate tester
-// right(180)
-//   cube([art_plate_length, art_plate_height, art_indent_depth]);
+up(z=lid_height / 2)
+  right(full_width + 10)
+    lid();
+
+// art plate tester
+right(180)
+  cube([art_plate_length, art_plate_height, art_indent_depth]);
