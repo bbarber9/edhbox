@@ -26,7 +26,7 @@ art_frame_thickness = 2;
 art_indent_depth = 2;
 
 art_top_buffer = 1;
-art_plate_tolerance = 0.2;
+art_plate_tolerance = 0.4;
 
 floor_thickness = 2;
 
