@@ -43,8 +43,8 @@ floor_thickness = 2;
 
 lid_tolerance = 0.2;
 lid_grip_from_front = 3;
-lid_grip_width = 4;
-lid_grip_depth = 3;
+lid_grip_width = 2;
+lid_grip_depth = 1;
 
 outer_corner_fillet_radius = 1.5;
 lid_edge_fillet_radius = 1.5;
@@ -117,9 +117,10 @@ module lid(isLidGap = false) {
         back(eps)
           attach(BACK, BACK, inside=true, align=TOP, inset=magnet_vertical_inset)
             magnet_slots();
+        // grip cutout
         translate([0, lid_grip_from_front, eps])
           attach(TOP, BOTTOM, align=FRONT, inside=true)
-            #prismoid(size1=[lid_width, lid_grip_width], size2=[lid_width, 0], h=lid_grip_depth);
+            prismoid(size1=[lid_width, lid_grip_width], size2=[lid_width, 0], h=lid_grip_depth);
       }
 }
 
