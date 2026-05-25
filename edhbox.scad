@@ -24,7 +24,7 @@ magnet_tolerance = 0.1;
 magnet_spacing = 20;
 magnet_slot_d = magnet_diameter + magnet_tolerance;
 // calculates the space between the edge of the magnet slot and the vertex of the hexagon
-magnet_space_to_vertex = (magnet_slot_d / 2) * ((1 / cos(30)) - 1);
+magnet_space_to_vertex = (magnet_slot_d / 2) * ( (1 / cos(30)) - 1);
 magnet_vertical_inset = magnet_buffer + magnet_space_to_vertex;
 
 divider_thickness = 1.5;
@@ -43,7 +43,8 @@ floor_thickness = 2;
 
 lid_tolerance = 0.2;
 
-outer_corner_fillet_radius = 1;
+outer_corner_fillet_radius = 1.5;
+lid_edge_fillet_radius = 1.5;
 
 // derived
 back_wall_thickness = magnet_thickness + magnet_back_buffer;
@@ -82,7 +83,19 @@ module lid(isLidGap = false) {
   width = isLidGap ? lid_gap_width : lid_width;
 
   module lid_body() {
-    cube([width - side_wall_thickness, len, top_height]) {
+    // The lid gap stays square for clearance, but the printed lid gets a rounded
+    // top-front edge. This wrapper passes its children through so the lower
+    // prismoid remains attached to whichever top shape is used.
+    module lid_top() {
+      if (isLidGap)
+        cube([width - side_wall_thickness, len, top_height])
+          children();
+      else
+        cuboid([width - side_wall_thickness, len, top_height], anchor=BOTTOM + LEFT + FRONT, rounding=lid_edge_fillet_radius, edges=TOP + FRONT, $fn=32)
+          children();
+    }
+
+    lid_top() {
       attach(BOTTOM, TOP, overlap=eps)
         prismoid(
           [width, len],
@@ -105,7 +118,7 @@ module lid(isLidGap = false) {
 
 diff()
   // main body
-  cuboid([full_width, full_length, full_height], anchor=BOTTOM + LEFT + FRONT, rounding=outer_corner_fillet_radius, edges="Z", $fn=32) {
+  cuboid([full_width, full_length, full_height], anchor=BOTTOM + LEFT + FRONT, rounding=outer_corner_fillet_radius, edges=[TOP, "Z"], $fn=32) {
     // lid cutout
     translate([0, -eps, eps])
       attach(TOP + FRONT, TOP + FRONT, inside=true)
