@@ -37,14 +37,15 @@ art_frame_thickness = 2;
 art_indent_depth = 2;
 
 art_top_buffer = 1;
-art_plate_tolerance = 0.6;
+art_plate_tolerance_h = 0.6;
+art_plate_tolerance_v = 0.8;
 
 floor_thickness = 2;
 
 lid_tolerance = 0.2;
-lid_grip_from_front = 3;
-lid_grip_width = 2;
-lid_grip_depth = 1;
+lid_grip_from_front = 6;
+lid_grip_width = 5;
+lid_grip_depth = 2;
 
 outer_corner_fillet_radius = 1.5;
 lid_edge_fillet_radius = 1.5;
@@ -71,8 +72,8 @@ full_height = floor_thickness + card_height_with_buf + lid_height;
 
 art_indent_length = full_length - art_frame_thickness * 2;
 art_indent_height = full_height - lid_height - art_top_buffer - art_frame_thickness;
-art_plate_length = art_indent_length - art_plate_tolerance;
-art_plate_height = art_indent_height - art_plate_tolerance;
+art_plate_length = art_indent_length - art_plate_tolerance_h;
+art_plate_height = art_indent_height - art_plate_tolerance_v;
 
 module magnet_slots() {
   xcopies(magnet_spacing, n=3)
@@ -170,4 +171,10 @@ up(z=lid_height / 2)
 
 // art plate tester
 right(180)
-  cube([art_plate_length, art_plate_height, art_indent_depth]);
+  cube([art_plate_length, art_plate_height, art_indent_depth])
+    position(TOP + LEFT)
+      color("red") {
+        text(str("len:", art_plate_length, "mm"), 6);
+        fwd(10)
+          text(str("ht:", art_plate_height, "mm"), 6);
+      }
