@@ -61,7 +61,7 @@ art_plate_tolerance_v = 0.8;
 
 floor_thickness = 2;
 
-lid_tolerance = 0.2;
+lid_tolerance = 0.4;
 lid_grip_from_front = 6;
 lid_grip_width = 5;
 lid_grip_depth = 2;
