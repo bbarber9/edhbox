@@ -20,6 +20,8 @@ main_body = true;
 lid = true;
 // Whether to generate the test art plate object
 art_plate_tester = true;
+// Whether or not to make the art slots on the main body
+art_plate_slots = true;
 
 /* [Hidden] */
 
@@ -165,14 +167,17 @@ if (main_body) {
         translate([0, commander_front_thickness, floor_thickness])
           attach(FRONT + BOTTOM, FRONT + BOTTOM, inside=true)
             cube([card_width_with_buf, token_cavity_length, card_height_with_buf + eps]);
-      // right art panel gap
-      translate([eps, 0, art_frame_thickness])
-        attach(RIGHT + BOTTOM, LEFT + BOTTOM, inside=true)
-          cube([art_indent_depth + eps, art_indent_length, art_indent_height]);
-      // left art panel gap
-      translate([-eps, 0, art_frame_thickness])
-        attach(LEFT + BOTTOM, RIGHT + BOTTOM, inside=true)
-          cube([art_indent_depth + eps, art_indent_length, art_indent_height]);
+      if (art_plate_slots) {
+        // right art panel gap
+        translate([eps, 0, art_frame_thickness])
+          attach(RIGHT + BOTTOM, LEFT + BOTTOM, inside=true)
+            cube([art_indent_depth + eps, art_indent_length, art_indent_height]);
+        // left art panel gap
+        translate([-eps, 0, art_frame_thickness])
+          attach(LEFT + BOTTOM, RIGHT + BOTTOM, inside=true)
+            cube([art_indent_depth + eps, art_indent_length, art_indent_height]);
+      }
+
       // hexagonal magnet slots
       fwd(magnet_back_buffer + eps)
         attach(BACK, BACK, inside=true, align=TOP, inset=magnet_vertical_inset)
