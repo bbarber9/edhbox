@@ -1,12 +1,25 @@
 include <BOSL2/std.scad>
 
+// Number of cards in the main deck compartment
 deck_cards = 99;
+// Number of cards in the token compartment
 token_cards = 20;
+// Whether or not to include the tocken compartment
 include_tokens = true;
 
+// Thickness of each card, default should fit double-sleeved cards
 card_thickness = 0.675;
+// Width of a card, defaults to width of a sleeved card
 card_height = 88;
+// Height of a card, defaults to the height of a sleeved card
 card_width = 63;
+
+// Whether to generate the main body object
+main_body = true;
+// Whether to generate the lid object
+lid = true;
+// Whether to generate the test art plate object
+art_plate_tester = true;
 
 /* [Hidden] */
 
@@ -125,56 +138,64 @@ module lid(isLidGap = false) {
       }
 }
 
-diff()
-  // main body
-  cuboid([full_width, full_length, full_height], anchor=BOTTOM + LEFT + FRONT, rounding=outer_corner_fillet_radius, edges=[TOP, "Z"], $fn=32) {
-    // lid cutout
-    translate([0, -eps, eps])
-      attach(TOP + FRONT, TOP + FRONT, inside=true)
-        lid(isLidGap=true);
-    // commander slot
-    color("lightslategrey")
-      translate([0, commander_wall_thickness, eps - lid_height])
+// main body
+if (main_body) {
+  diff()
+    // main body
+    cuboid([full_width, full_length, full_height], anchor=BOTTOM + LEFT + FRONT, rounding=outer_corner_fillet_radius, edges=[TOP, "Z"], $fn=32) {
+      // lid cutout
+      translate([0, -eps, eps])
         attach(TOP + FRONT, TOP + FRONT, inside=true)
-          cube([card_width_with_buf, commander_slot_thickness, card_height_with_buf + eps]);
-    // commander window
-    translate([0, -eps, floor_thickness + commander_frame_inset])
-      attach(FRONT + BOTTOM, FRONT + BOTTOM, inside=true)
-        cube([window_width, commander_wall_thickness + eps * 2, window_height]);
-    // deck cavity
-    translate([0, -back_wall_thickness, floor_thickness])
-      attach(BACK + BOTTOM, BACK + BOTTOM, inside=true)
-        cube([card_width_with_buf, deck_cavity_length, card_height_with_buf + eps]);
-    // token cavity
-    if (include_tokens)
-      translate([0, commander_front_thickness, floor_thickness])
+          lid(isLidGap=true);
+      // commander slot
+      color("lightslategrey")
+        translate([0, commander_wall_thickness, eps - lid_height])
+          attach(TOP + FRONT, TOP + FRONT, inside=true)
+            cube([card_width_with_buf, commander_slot_thickness, card_height_with_buf + eps]);
+      // commander window
+      translate([0, -eps, floor_thickness + commander_frame_inset])
         attach(FRONT + BOTTOM, FRONT + BOTTOM, inside=true)
-          cube([card_width_with_buf, token_cavity_length, card_height_with_buf + eps]);
-    // right art panel gap
-    translate([eps, 0, art_frame_thickness])
-      attach(RIGHT + BOTTOM, LEFT + BOTTOM, inside=true)
-        cube([art_indent_depth + eps, art_indent_length, art_indent_height]);
-    // left art panel gap
-    translate([-eps, 0, art_frame_thickness])
-      attach(LEFT + BOTTOM, RIGHT + BOTTOM, inside=true)
-        cube([art_indent_depth + eps, art_indent_length, art_indent_height]);
-    // hexagonal magnet slots
-    fwd(magnet_back_buffer + eps)
-      attach(BACK, BACK, inside=true, align=TOP, inset=magnet_vertical_inset)
-        magnet_slots();
-  }
+          cube([window_width, commander_wall_thickness + eps * 2, window_height]);
+      // deck cavity
+      translate([0, -back_wall_thickness, floor_thickness])
+        attach(BACK + BOTTOM, BACK + BOTTOM, inside=true)
+          cube([card_width_with_buf, deck_cavity_length, card_height_with_buf + eps]);
+      // token cavity
+      if (include_tokens)
+        translate([0, commander_front_thickness, floor_thickness])
+          attach(FRONT + BOTTOM, FRONT + BOTTOM, inside=true)
+            cube([card_width_with_buf, token_cavity_length, card_height_with_buf + eps]);
+      // right art panel gap
+      translate([eps, 0, art_frame_thickness])
+        attach(RIGHT + BOTTOM, LEFT + BOTTOM, inside=true)
+          cube([art_indent_depth + eps, art_indent_length, art_indent_height]);
+      // left art panel gap
+      translate([-eps, 0, art_frame_thickness])
+        attach(LEFT + BOTTOM, RIGHT + BOTTOM, inside=true)
+          cube([art_indent_depth + eps, art_indent_length, art_indent_height]);
+      // hexagonal magnet slots
+      fwd(magnet_back_buffer + eps)
+        attach(BACK, BACK, inside=true, align=TOP, inset=magnet_vertical_inset)
+          magnet_slots();
+    }
+}
 
 // lid
-up(z=lid_height / 2)
-  right(full_width + 10)
-    lid();
+if (lid) {
+  up(z=lid_height / 2)
+    right(full_width + 10)
+      lid();
+}
 
 // art plate tester
-right(180)
-  cube([art_plate_length, art_plate_height, art_indent_depth])
-    position(TOP)
-      color("red") {
-        text(str("len:", art_plate_length, "mm"), 6, halign="center");
-        fwd(10)
-          text(str("ht:", art_plate_height, "mm"), 6, halign="center");
-      }
+if (art_plate_tester) {
+  right(180)
+    cube([art_plate_length, art_plate_height, art_indent_depth])
+      // text that shows how large the plate is
+      position(TOP)
+        color("red") {
+          text(str("len:", art_plate_length, "mm"), 6, halign="center");
+          fwd(10)
+            text(str("ht:", art_plate_height, "mm"), 6, halign="center");
+        }
+}
