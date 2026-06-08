@@ -28,6 +28,10 @@ art_plate_slots = true;
 // Short for epsilon. It's for reducing z-fighting in the preview renderer
 eps = 0.001;
 
+// Rounds a number to a specified number of decimal points
+function round_to(value, decimals = 0) =
+  let (multiplier = pow(10, decimals)) round(value * multiplier) / multiplier;
+
 card_size_buf = 6;
 card_height_with_buf = card_height + card_size_buf;
 card_width_with_buf = card_width + card_size_buf;
@@ -87,8 +91,9 @@ full_height = floor_thickness + card_height_with_buf + lid_height;
 
 art_indent_length = full_length - art_frame_thickness * 2;
 art_indent_height = full_height - lid_height - art_top_buffer - art_frame_thickness;
-art_plate_length = art_indent_length - art_plate_tolerance_h;
-art_plate_height = art_indent_height - art_plate_tolerance_v;
+// Adding minumal rounding to these dimensions since it makes it easier to size images in hueforge
+art_plate_length = round_to(art_indent_length - art_plate_tolerance_h, 2);
+art_plate_height = round_to(art_indent_height - art_plate_tolerance_v, 2);
 
 module magnet_slots() {
   xcopies(magnet_spacing, n=3)
