@@ -172,9 +172,9 @@ up(z=lid_height / 2)
 // art plate tester
 right(180)
   cube([art_plate_length, art_plate_height, art_indent_depth])
-    position(TOP + LEFT)
+    position(TOP)
       color("red") {
-        text(str("len:", art_plate_length, "mm"), 6);
+        text(str("len:", art_plate_length, "mm"), 6, halign="center");
         fwd(10)
-          text(str("ht:", art_plate_height, "mm"), 6);
+          text(str("ht:", art_plate_height, "mm"), 6, halign="center");
       }
