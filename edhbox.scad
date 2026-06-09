@@ -12,17 +12,19 @@ Art_Plate_Slots = true;
 // Add the token compartment to the main body?
 Include_Tokens = true;
 
-/* [Card Options] */
+/* [Card Count] */
 // Number of cards in the main deck compartment
-deck_cards = 99;
+Deck_Cards = 99;
 // Number of cards in the token compartment
-token_cards = 20;
+Token_Cards = 20;
+
+/* [Card Dimensions] */
 // Thickness of each card, default should fit double-sleeved cards
-card_thickness = 0.675;
+Card_Thickness = 0.675;
 // Width of a card, defaults to width of a sleeved card
-card_height = 88;
+Card_Height = 88;
 // Height of a card, defaults to the height of a sleeved card
-card_width = 63;
+Card_Width = 63;
 
 /* [Hidden] */
 
@@ -36,8 +38,8 @@ function round_to(value, decimals = 0) =
 part_gap = 10;
 
 card_size_buf = 6;
-card_height_with_buf = card_height + card_size_buf;
-card_width_with_buf = card_width + card_size_buf;
+card_height_with_buf = Card_Height + card_size_buf;
+card_width_with_buf = Card_Width + card_size_buf;
 magnet_diameter = 5;
 magnet_thickness = 2.65;
 magnet_buffer = 0.8;
@@ -74,8 +76,8 @@ lid_edge_fillet_radius = 1.5;
 
 // derived
 back_wall_thickness = magnet_thickness + magnet_back_buffer;
-deck_cavity_length = card_thickness * deck_cards;
-token_cavity_length = card_thickness * token_cards;
+deck_cavity_length = Card_Thickness * Deck_Cards;
+token_cavity_length = Card_Thickness * Token_Cards;
 token_section_length = Include_Tokens ? token_cavity_length + divider_thickness : 0;
 commander_front_thickness = commander_wall_thickness * 2 + commander_slot_thickness;
 lid_height = magnet_slot_d + (magnet_buffer * 2) + (magnet_space_to_vertex * 2);
