@@ -1,27 +1,28 @@
 include <BOSL2/std.scad>
 
+/* [Objects] */
+// Generate the main deckbox body?
+Main_Body = true;
+// Generate the lid?
+Lid = true;
+// Generate the art plate tester (has dimensions printed on)?
+Art_Plate_Tester = true;
+// Add art slots to the main body?
+Art_Plate_Slots = true;
+// Add the token compartment to the main body?
+Include_Tokens = true;
+
+/* [Card Options] */
 // Number of cards in the main deck compartment
 deck_cards = 99;
 // Number of cards in the token compartment
 token_cards = 20;
-// Whether or not to include the tocken compartment
-include_tokens = true;
-
 // Thickness of each card, default should fit double-sleeved cards
 card_thickness = 0.675;
 // Width of a card, defaults to width of a sleeved card
 card_height = 88;
 // Height of a card, defaults to the height of a sleeved card
 card_width = 63;
-
-// Whether to generate the main body object
-main_body = true;
-// Whether to generate the lid object
-lid = true;
-// Whether to generate the test art plate object
-art_plate_tester = true;
-// Whether or not to make the art slots on the main body
-art_plate_slots = true;
 
 /* [Hidden] */
 
@@ -31,6 +32,8 @@ eps = 0.001;
 // Rounds a number to a specified number of decimal points
 function round_to(value, decimals = 0) =
   let (multiplier = pow(10, decimals)) round(value * multiplier) / multiplier;
+
+part_gap = 10;
 
 card_size_buf = 6;
 card_height_with_buf = card_height + card_size_buf;
@@ -73,7 +76,7 @@ lid_edge_fillet_radius = 1.5;
 back_wall_thickness = magnet_thickness + magnet_back_buffer;
 deck_cavity_length = card_thickness * deck_cards;
 token_cavity_length = card_thickness * token_cards;
-token_section_length = include_tokens ? token_cavity_length + divider_thickness : 0;
+token_section_length = Include_Tokens ? token_cavity_length + divider_thickness : 0;
 commander_front_thickness = commander_wall_thickness * 2 + commander_slot_thickness;
 lid_height = magnet_slot_d + (magnet_buffer * 2) + (magnet_space_to_vertex * 2);
 lid_length = commander_front_thickness + token_section_length + deck_cavity_length;
@@ -101,7 +104,7 @@ module magnet_slots() {
 }
 
 // Create either the lid or the lid gap by 
-module lid(isLidGap = false) {
+module Lid(isLidGap = false) {
   len = isLidGap ? lid_length + eps : lid_length;
   top_height = isLidGap ? (lid_height / 2) + eps : lid_height / 2;
   width = isLidGap ? lid_gap_width : lid_width;
@@ -146,14 +149,14 @@ module lid(isLidGap = false) {
 }
 
 // main body
-if (main_body) {
+if (Main_Body) {
   diff()
     // main body
     cuboid([full_width, full_length, full_height], anchor=BOTTOM + LEFT + FRONT, rounding=outer_corner_fillet_radius, edges=[TOP, "Z"], $fn=32) {
       // lid cutout
       translate([0, -eps, eps])
         attach(TOP + FRONT, TOP + FRONT, inside=true)
-          lid(isLidGap=true);
+          Lid(isLidGap=true);
       // commander slot
       color("lightslategrey")
         translate([0, commander_wall_thickness, eps - lid_height])
@@ -168,11 +171,11 @@ if (main_body) {
         attach(BACK + BOTTOM, BACK + BOTTOM, inside=true)
           cube([card_width_with_buf, deck_cavity_length, card_height_with_buf + eps]);
       // token cavity
-      if (include_tokens)
+      if (Include_Tokens)
         translate([0, commander_front_thickness, floor_thickness])
           attach(FRONT + BOTTOM, FRONT + BOTTOM, inside=true)
             cube([card_width_with_buf, token_cavity_length, card_height_with_buf + eps]);
-      if (art_plate_slots) {
+      if (Art_Plate_Slots) {
         // right art panel gap
         translate([eps, 0, art_frame_thickness])
           attach(RIGHT + BOTTOM, LEFT + BOTTOM, inside=true)
@@ -191,15 +194,15 @@ if (main_body) {
 }
 
 // lid
-if (lid) {
+if (Lid) {
   up(z=lid_height / 2)
-    right(full_width + 10)
-      lid();
+    right(full_width + part_gap)
+      Lid();
 }
 
 // art plate tester
-if (art_plate_tester) {
-  right(180)
+if (Art_Plate_Tester) {
+  right(full_width + lid_width + part_gap * 2)
     cube([art_plate_length, art_plate_height, art_indent_depth])
       // text that shows how large the plate is
       position(TOP)
